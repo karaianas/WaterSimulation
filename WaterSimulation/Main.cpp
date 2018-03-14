@@ -48,7 +48,7 @@ void setup_opengl_settings()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glDisable(GL_CULL_FACE);
-	glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
+	glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
 }
 
 void print_versions()

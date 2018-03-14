@@ -122,10 +122,14 @@ void Particle::F_viscosity()
 	for (int i = 0; i < neighbors.size(); i++)
 	{
 		glm::vec3 x_ij = position - neighbors[i]->position;
-		if (neighbors[i]->rho < 0.00001f)
+		float nrho = neighbors[i]->rho;
+		if (nrho < 0.00001f)
 			return;
-		force_ += neighbors[i]->mass / neighbors[i]->rho * (velocity - neighbors[i]->velocity) \
-			* glm::dot(x_ij , dW_ij(neighbors[i]->position)) / float(glm::dot(x_ij, x_ij) * h2_01);
+		float denom = float(glm::dot(x_ij, x_ij) * h2_01);
+		//if (denom < 0.00001f)
+		//	return;
+		force_ += neighbors[i]->mass / nrho * (velocity - neighbors[i]->velocity) \
+			* glm::dot(x_ij , dW_ij(neighbors[i]->position)) / denom;
 	}
 	float viscos = 0.0000005f;//0.000001f; //0.0000005f; //0.0000001f;
 	force_ *= 2 * mass * viscos;

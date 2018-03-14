@@ -11,10 +11,13 @@ public:
 	glm::mat4 worldM;
 
 	void draw(GLuint, glm::mat4);
-	void update();
+	void setColor(glm::vec3 color_);
+	void update(glm::mat4 S);
 
-	GLuint VBO, VAO, EBO;
+	GLuint VBO_pos, VBO_nor, VAO, EBO;
 	GLuint uMVP, uModel, uColor;
+
+	glm::vec3 color;
 };
 
 const GLfloat vertices[8][3] = {

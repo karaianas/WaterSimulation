@@ -69,6 +69,10 @@ ParticleSystem::ParticleSystem()
 
 }
 
+ParticleSystem::~ParticleSystem()
+{
+}
+
 int ParticleSystem::tap()
 {
 	for(int i = -1; i <= 1; i++)
@@ -87,6 +91,13 @@ int ParticleSystem::tap()
 
 	cout << "Number of particles: " << NUM << endl;
 	return 0;
+}
+
+void ParticleSystem::boxSizeUpdate(float size_)
+{
+	boxSize = (size_ - smoothLen) / 2.0f;
+	for (int i = 0; i < NUM; i++)
+		particles[i]->setHitConstants(boxSize, boxElasticity);
 }
 
 void ParticleSystem::update(float dt)
@@ -188,17 +199,17 @@ void ParticleSystem::drawObj(Obj* obj, GLuint program, glm::mat4 P, glm::mat4 V)
 		M[3] = glm::vec4(pos, 1.0f);
 		//obj->setColor(glm::vec3(0.2f, 0.4f, 1.0f));
 		
-		if (particles[i]->id == 0)
-		{
-			obj->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
-		}
-		else
-		{
-			if(particles[i]->flag)
-				obj->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
-			else
-				obj->setColor(glm::vec3(1.0f, 1.0f, 1.0f) * float(particles[i]->id) / float(NUM));
-		}
+		//if (particles[i]->id == 0)
+		//{
+		//	obj->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
+		//}
+		//else
+		//{
+		//	if(particles[i]->flag)
+		//		obj->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
+		//	else
+		//		obj->setColor(glm::vec3(1.0f, 1.0f, 1.0f) * float(particles[i]->id) / float(NUM));
+		//}
 		
 		obj->setWorldM(M);
 		obj->draw(program, PV);
@@ -240,8 +251,7 @@ void ParticleSystem::initBuffers()
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-	*/
-	
+	*/	
 }
 
 void ParticleSystem::setNeighbors()

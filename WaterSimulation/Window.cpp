@@ -12,8 +12,8 @@ int Window::height;
 #define FRAGMENT_SHADER_PATH ".//Shaders//shader.frag"
 GLint shaderProgram;
 
-float theta = 0.0f;
 float dtheta = 3.14159f / 60;
+float theta = 0.0f;
 float radius = 5.0f;
 float cylheight = 0.0f;
 
@@ -27,7 +27,7 @@ glm::mat4 Window::V;
 bool wireframe = false;
 bool isLeft = false;
 bool isRight = false;
-bool isTap = false;
+bool isPlay = false;
 
 float totalTime = 0.0f;
 glm::vec2 prev_pos;
@@ -37,14 +37,17 @@ ParticleSystem ps;
 Obj* obj;
 Cube* box;
 
+float boxScale = 1.0f;
+
 using namespace std;
 
 void Window::initialize_objects()
 {
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-	obj = new Obj(".//Models//particle_low.obj");
+	obj = new Obj(".//Models//particle_low2.obj");
 	obj->setColor(glm::vec3(0.3f, 0.7f, 1.0f));
 	box = new Cube();
+	box->setColor(glm::vec3(0.5f, 0.7f, 0.9f));
 	//ps.update(0.1f);
 
 }
@@ -121,7 +124,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
-	if (isTap)
+	if (isPlay)
 	{
 		ps.update(0.01f);//0.0001f
 	}
@@ -156,10 +159,31 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 
 		if (key == GLFW_KEY_SPACE)
 		{
-			if (isTap)
-				isTap = false;
+			if (isPlay)
+				isPlay = false;
 			else
-				isTap = true;
+				isPlay = true;
+		}
+
+		if (key == GLFW_KEY_UP)
+		{
+			if (boxScale < 2.0f)
+			{
+				//cout << boxScale << endl;
+				boxScale += 0.1f;
+				box->update(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * boxScale));
+				ps.boxSizeUpdate(boxScale);
+			}
+		}
+
+		if (key == GLFW_KEY_DOWN)
+		{
+			if (boxScale > 1.1f)
+			{
+				boxScale -= 0.1f;
+				box->update(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * boxScale));
+				ps.boxSizeUpdate(boxScale);
+			}
 		}
 
 		if (key == GLFW_KEY_P)
