@@ -73,22 +73,21 @@ void Obj::setColor(glm::vec3 _color)
 
 void Obj::parser(const char * path)
 {
-	// Populate the face indices, vertices, and normals vectors with the OBJ Object data
-	FILE* fp;     // file pointer
-	float x, y, z;  // vertex coordinates
-	float r, g, b;  // vertex color
-	int c1, c2;    // characters read from file
+	FILE* fp;
+	float x, y, z;
+	float r, g, b;
+	int c1, c2;
 	GLuint f0, f1, f2, f0_, f1_, f2_;
 
-	fp = fopen(path, "rb");  // make the file name configurable so you can load other files
-	if (fp == NULL) { std::cerr << "error loading file" << std::endl; exit(-1); }  // just in case the file can't be found or is corrupt
+	fp = fopen(path, "rb");
+	if (fp == NULL) { std::cerr << "error loading file" << std::endl; exit(-1); } 
 
 	c1 = fgetc(fp);
 	c2 = fgetc(fp);
 
 	while (c1 != EOF)
 	{
-		// if it's a vertex coord
+		// Vertex
 		if ((c1 == 'v') && (c2 == ' '))
 		{
 			fscanf(fp, "%f %f %f %f %f %f", &x, &y, &z, &r, &g, &b);
@@ -96,14 +95,14 @@ void Obj::parser(const char * path)
 			vertices.push_back(glm::vec3(x * scalef, y * scalef, z * scalef));
 			//std::cout << vertices[0].x << " " << vertices[0].y << " " << vertices[0].z << std::endl;
 		}
-		// if it's a vertex normal
+		// Normal
 		else if ((c1 == 'v') && (c2 == 'n'))
 		{
 			fscanf(fp, " %f %f %f", &x, &y, &z);
 			normals.push_back(glm::vec3(x, y, z));
 			//std::cout << normals[0].x << " " << normals[0].y << " " << normals[0].z << std::endl;
 		}
-		// if it's a face
+		// Face
 		else if ((c1 == 'f') && (c2 == ' '))
 		{
 			fscanf(fp, "%u//%u %u//%u %u//%u ", &f0, &f0_, &f1, &f1_, &f2, &f2_);

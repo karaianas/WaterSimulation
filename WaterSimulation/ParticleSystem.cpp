@@ -6,15 +6,21 @@ ParticleSystem::ParticleSystem()
 {
 	NUM = 1000;
 
-	radius = 0.01f;
-	hradius = 0.1f;
+	// Particle property
+	radius = 0.05f;
+	smoothLen = 0.1f;
 	mass = 0.3f;
-	rho_rest = mass / pow(hradius, 3);
+	rho_rest = mass / pow(smoothLen, 3);
 	k = 1.0f;
 	d = 3;
 
+	// Box property
+	boxSize = 0.5f - smoothLen / 2.0f;
+	boxElasticity = 0.3f;
+
+	// Hash table
 	gridSize = 10000;
-	ht = HashTable(gridSize, hradius);
+	ht = HashTable(gridSize, smoothLen);
 
 	//float tem = sqrt(100);
 	//int count = 0;
@@ -24,7 +30,7 @@ ParticleSystem::ParticleSystem()
 	//	{
 	//		Particle* p = new Particle();
 	//		p->id = count;
-	//		p->setConstants(d, hradius, rho_rest, mass, k);
+	//		p->setConstants(d, smoothLen, rho_rest, mass, k);
 	//		p->position = glm::vec3(float(i) / tem - 0.4f, 0.0f, float(j) / tem - 0.4f);
 	//		particles.push_back(p);
 	//		count++;
@@ -37,21 +43,18 @@ ParticleSystem::ParticleSystem()
 	//	{
 	//		Particle* p = new Particle();
 	//		p->id = count;
-	//		p->setConstants(d, hradius, rho_rest, mass, k);
+	//		p->setConstants(d, smoothLen, rho_rest, mass, k);
 	//		p->position = glm::vec3(float(i) / tem - 0.43f, 0.2f, float(j) / tem - 0.43f);
 	//		particles.push_back(p);
 	//		count++;
 	//	}
 	//}
 
-	float boxSize = 0.5f - hradius / 2.0f;
-	float boxElasticity = 0.3f;
-
 	for (int i = 0; i < NUM; i++)
 	{
 		Particle* p = new Particle();
 		p->id = i;
-		p->setConstants(d, hradius, rho_rest, mass, k);
+		p->setConstants(d, smoothLen, rho_rest, mass, k);
 		p->setHitConstants(boxSize, boxElasticity);
 		float dx = float(rand() % 1000) / 1000.0f - 0.5f;
 		float dy = float(rand() % 1000) / 1000.0f - 0.5f;
@@ -60,7 +63,6 @@ ParticleSystem::ParticleSystem()
 		//p->velocity = 1.0f * glm::vec3(dx, dy, dz);
 		particles.push_back(p);
 		ht.addToCell(p);
-
 	}
 
 	setNeighbors();
@@ -75,35 +77,13 @@ int ParticleSystem::tap()
 			{
 				Particle* p = new Particle();
 				p->id = NUM;
-				p->setConstants(d, hradius, rho_rest, mass, k);
-				p->position = 0.1f * glm::vec3(i, j, l) + glm::vec3(0.0f, 0.7f, 0.0f);
+				p->setConstants(d, smoothLen, rho_rest, mass, k);
+				p->setHitConstants(boxSize, boxElasticity);
+				p->position = 0.1f * glm::vec3(i, j, l) + glm::vec3(0.0f, boxSize/2.0f, 0.0f);
 				particles.push_back(p);
 				ht.addToCell(p);
 				NUM++;
 			}
-	//for (int i = 0; i < 100; i++)
-	//{
-	//	Particle* p = new Particle();
-	//	p->id = NUM;
-	//	p->setConstants(d, hradius, rho_rest, mass, k);
-
-	//	float dx = float(rand() % 1000) / 1000.0f - 0.5f;
-	//	float dy = float(rand() % 1000) / 1000.0f - 0.5f;
-	//	float dz = float(rand() % 1000) / 1000.0f - 0.5f;
-	//	p->position = 1.0f * glm::vec3(dx, dy, dz);
-	//	//p->velocity = 1.0f * glm::vec3(dx, dy, dz);
-	//	particles.push_back(p);
-	//	ht.addToCell(p);
-	//	NUM++;
-	//}
-
-	//Particle* p = new Particle();
-	//p->id = NUM;
-	//p->setConstants(d, hradius, rho_rest, mass, k);
-	//p->position = glm::vec3(0.0f, 0.3f, 0.0f);
-	//particles.push_back(p);
-	//ht.addToCell(p);
-	//NUM++;
 
 	cout << "Number of particles: " << NUM << endl;
 	return 0;
@@ -112,7 +92,10 @@ int ParticleSystem::tap()
 void ParticleSystem::update(float dt)
 {
 	// (1) Find neighbors
+	for (int i = 0; i < NUM; i++)
+		particles[i]->flag = false;
 	setNeighbors();
+	
 	/*
 	// Brute force
 	for (int i = 0; i < NUM; i++)
@@ -126,7 +109,7 @@ void ParticleSystem::update(float dt)
 			if (particles[i]->id != particles[j]->id)
 			{
 				float len = glm::length(particles[i]->position - particles[j]->position);
-				if (len <= 2.0f * hradius)
+				if (len <= 2.0f * smoothLen)
 				{
 					if (i == 327)
 						particles[j]->flag = true;
@@ -195,29 +178,31 @@ void ParticleSystem::draw(GLuint program, glm::mat4 P, glm::mat4 V)
 void ParticleSystem::drawObj(Obj* obj, GLuint program, glm::mat4 P, glm::mat4 V)
 {
 	initBuffers();
-	int count = 0;
+
+	glm::mat4 PV = P * V;
+	//int count = 0;
 	for (int i = 0; i < NUM; i++)
 	{
 		glm::vec3 pos = particles[i]->position;
 		glm::mat4 M(1.0f);
 		M[3] = glm::vec4(pos, 1.0f);
-		obj->setColor(glm::vec3(0.2f, 0.4f, 1.0f));
+		//obj->setColor(glm::vec3(0.2f, 0.4f, 1.0f));
 		
-		//if (count == 327)
-		//{
-		//	obj->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
-		//}
-		//else
-		//{
-		//	if(particles[i]->flag)
-		//		obj->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
-		//	else
-		//		obj->setColor(glm::vec3(0.0f, 1.0f, 1.0f) * float(particles[i]->id) / float(NUM));
-		//}
-		//
+		if (particles[i]->id == 0)
+		{
+			obj->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+		else
+		{
+			if(particles[i]->flag)
+				obj->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
+			else
+				obj->setColor(glm::vec3(1.0f, 1.0f, 1.0f) * float(particles[i]->id) / float(NUM));
+		}
+		
 		obj->setWorldM(M);
-		obj->draw(program, P * V);
-		count++;
+		obj->draw(program, PV);
+		//count++;
 	}
 }
 
@@ -232,6 +217,7 @@ void ParticleSystem::initBuffers()
 	for (int i = 0; i < NUM; i++)
 		positions.push_back(particles[i]->position);
 
+	/*
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO_pos);
 
@@ -254,6 +240,7 @@ void ParticleSystem::initBuffers()
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	*/
 	
 }
 

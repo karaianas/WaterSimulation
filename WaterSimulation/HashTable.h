@@ -103,6 +103,8 @@ public:
 				if (p->id != ptr->id && glm::length(p->position - pos) <= 2 * d)
 				{
 					//cout << p->id << " is a neighbor" << endl;
+					if (ptr->id == 0)
+						p->flag = true;
 					neighbors.push_back(p);
 				}
 			}

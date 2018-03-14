@@ -34,7 +34,8 @@ private:
 	vector<glm::vec3> positions;
 	vector<glm::vec3> normals;
 
-	float radius, hradius, rho_rest, mass, k, d;
+	float radius, smoothLen, rho_rest, mass, k, d;
+	float boxSize, boxElasticity;
 	int gridSize;
 	int NUM;
 };

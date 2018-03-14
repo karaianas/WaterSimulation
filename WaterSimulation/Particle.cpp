@@ -94,7 +94,6 @@ void Particle::calcDensity()
 	for (int i = 0; i < neighbors.size(); i++)
 		temp += neighbors[i]->mass * W_ij(neighbors[i]->position);
 	rho = temp;
-
 }
 
 void Particle::calcPressure()
