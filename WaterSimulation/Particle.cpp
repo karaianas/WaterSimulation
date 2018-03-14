@@ -11,15 +11,17 @@ Particle::Particle()
 
 	pressure = 0.0f;
 	rho = 0.0f;
+	threshold = 0.001f;
 }
 
-void Particle::setConstants(int d_, float h_, float rho_rest_, float mass_, float k_)
+void Particle::setConstants(int d_, float h_, float rho_rest_, float mass_, float k_, float vis_)
 {
 	d = d_;
 	h = h_;
 	rho_rest = rho_rest_;
 	mass = mass_;
 	k = k_;
+	viscosity = vis_;
 
 	// Set commonly used constants
 	gravity = glm::vec3(0, -9.8f, 0.0f) * mass;
@@ -106,11 +108,13 @@ void Particle::F_pressure()
 	glm::vec3 force_(0.0f);
 	for (int i = 0; i < neighbors.size(); i++)
 	{
-		if (pow(rho, 2) < 0.00001f || pow(neighbors[i]->rho, 2) < 0.00001f)
+		float mrho = pow(rho, 2);
+		float nrho = pow(neighbors[i]->rho, 2);
+		if (mrho < threshold || nrho < threshold)
 			return;
 
-		force_ += neighbors[i]->mass * (pressure / pow(rho, 2) + \
-			neighbors[i]->pressure / pow(neighbors[i]->rho, 2)) * dW_ij(neighbors[i]->position);
+		force_ += neighbors[i]->mass * (pressure / mrho + \
+			neighbors[i]->pressure / nrho) * dW_ij(neighbors[i]->position);
 	}
 	force_ *= -mass;
 	applyForce(force_);
@@ -131,8 +135,8 @@ void Particle::F_viscosity()
 		force_ += neighbors[i]->mass / nrho * (velocity - neighbors[i]->velocity) \
 			* glm::dot(x_ij , dW_ij(neighbors[i]->position)) / denom;
 	}
-	float viscos = 0.0000005f;//0.000001f; //0.0000005f; //0.0000001f;
-	force_ *= 2 * mass * viscos;
+	//float viscos = 0.0000005f;//0.000001f; //0.0000005f; //0.0000001f;
+	force_ *= 2 * mass * viscosity;
 	applyForce(force_);
 }
 

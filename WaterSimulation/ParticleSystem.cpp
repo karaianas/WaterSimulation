@@ -13,13 +13,14 @@ ParticleSystem::ParticleSystem()
 	rho_rest = mass / pow(smoothLen, 3);
 	k = 1.0f;
 	d = 3;
+	viscosity = 0.000005f;
 
 	// Box property
 	boxSize = 0.5f - smoothLen / 2.0f;
 	boxElasticity = 0.3f;
 
 	// Hash table
-	gridSize = 10000;
+	gridSize = pow(boxSize/smoothLen, 3);
 	ht = HashTable(gridSize, smoothLen);
 
 	//float tem = sqrt(100);
@@ -54,7 +55,7 @@ ParticleSystem::ParticleSystem()
 	{
 		Particle* p = new Particle();
 		p->id = i;
-		p->setConstants(d, smoothLen, rho_rest, mass, k);
+		p->setConstants(d, smoothLen, rho_rest, mass, k, viscosity);
 		p->setHitConstants(boxSize, boxElasticity);
 		float dx = float(rand() % 1000) / 1000.0f - 0.5f;
 		float dy = float(rand() % 1000) / 1000.0f - 0.5f;
@@ -81,7 +82,7 @@ int ParticleSystem::tap()
 			{
 				Particle* p = new Particle();
 				p->id = NUM;
-				p->setConstants(d, smoothLen, rho_rest, mass, k);
+				p->setConstants(d, smoothLen, rho_rest, mass, k, viscosity);
 				p->setHitConstants(boxSize, boxElasticity);
 				p->position = 0.1f * glm::vec3(i, j, l) + glm::vec3(0.0f, boxSize/2.0f, 0.0f);
 				particles.push_back(p);
@@ -98,6 +99,24 @@ void ParticleSystem::boxSizeUpdate(float size_)
 	boxSize = (size_ - smoothLen) / 2.0f;
 	for (int i = 0; i < NUM; i++)
 		particles[i]->setHitConstants(boxSize, boxElasticity);
+}
+
+void ParticleSystem::viscosityUpdate(bool mode)
+{
+	if (viscosity < 0.000005f  && mode == 0)
+	{
+		viscosity += 0.0000001f;
+		cout << "Viscosity: " << viscosity << endl;
+		for (int i = 0; i < NUM; i++)
+			particles[i]->viscosity = viscosity;
+	}
+	else if (viscosity > 0.0000001f && mode == 1)
+	{
+		viscosity -= 0.0000001f;
+		cout << "Viscosity: " << viscosity << endl;
+		for (int i = 0; i < NUM; i++)
+			particles[i]->viscosity = viscosity;
+	}
 }
 
 void ParticleSystem::update(float dt)

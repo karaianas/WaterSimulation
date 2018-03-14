@@ -10,7 +10,7 @@ class Particle {
 public:
 
 	Particle();
-	void setConstants(int d_, float h_, float rho_rest_, float mass_, float k_);
+	void setConstants(int d_, float h_, float rho_rest_, float mass_, float k_, float vis_);
 	
 	void setHitConstants(float size_, float elasticity_)
 	{
@@ -50,8 +50,10 @@ public:
 	float h;
 	float k;
 	int d;
+	float viscosity;
 
 	// Commonly used constants
+	float threshold;
 	glm::vec3 gravity;
 	float massInv;
 	float massElas;

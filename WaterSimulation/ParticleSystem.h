@@ -19,6 +19,7 @@ public:
 
 	int tap();
 	void boxSizeUpdate(float size_);
+	void viscosityUpdate(bool mode);
 
 	void update(float dt);
 	void draw(GLuint program, glm::mat4 P, glm::mat4 V);
@@ -37,7 +38,7 @@ private:
 	vector<glm::vec3> positions;
 	vector<glm::vec3> normals;
 
-	float radius, smoothLen, rho_rest, mass, k, d;
+	float radius, smoothLen, rho_rest, mass, k, d, viscosity;
 	float boxSize, boxElasticity;
 	int gridSize;
 	int NUM;

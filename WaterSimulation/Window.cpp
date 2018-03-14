@@ -37,6 +37,7 @@ ParticleSystem ps;
 Obj* obj;
 Cube* box;
 
+int parameter = -1;
 float boxScale = 1.0f;
 
 using namespace std;
@@ -165,30 +166,59 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 				isPlay = true;
 		}
 
+		if (key == GLFW_KEY_B)
+			parameter = 0;
+		else if (key == GLFW_KEY_V)
+			parameter = 1;
+		else if (key == GLFW_KEY_N)
+			parameter = 2;
+
 		if (key == GLFW_KEY_UP)
 		{
-			if (boxScale < 2.0f)
+			if (parameter == 0)
 			{
-				//cout << boxScale << endl;
-				boxScale += 0.1f;
-				box->update(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * boxScale));
-				ps.boxSizeUpdate(boxScale);
+				if (boxScale < 2.0f)
+				{
+					//cout << boxScale << endl;
+					boxScale += 0.1f;
+					box->update(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * boxScale));
+					ps.boxSizeUpdate(boxScale);
+					cout << "Box Size: " << boxScale << endl;
+				}
 			}
-		}
+			else if (parameter == 1)
+			{
+				ps.viscosityUpdate(0);
+			}
 
+		}
 		if (key == GLFW_KEY_DOWN)
 		{
-			if (boxScale > 1.1f)
+			if (parameter == 0)
 			{
-				boxScale -= 0.1f;
-				box->update(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * boxScale));
-				ps.boxSizeUpdate(boxScale);
+				if (boxScale >= 1.1f)
+				{
+					boxScale -= 0.1f;
+					box->update(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * boxScale));
+					ps.boxSizeUpdate(boxScale);
+					cout << "Box Size: " << boxScale << endl;
+				}
 			}
+			else if (parameter == 1)
+			{
+				ps.viscosityUpdate(1);
+			}
+
 		}
 
+		// Add particles
 		if (key == GLFW_KEY_P)
-		{
 			ps.tap();
+
+		// Increast viscosity
+		if (key == GLFW_KEY_V)
+		{
+
 		}
 
 		if (key == GLFW_KEY_A)
