@@ -4,24 +4,7 @@ using namespace std;
 
 ParticleSystem::ParticleSystem()
 {
-	NUM = 1000;
-
-	// Particle property
-	radius = 0.05f;
-	smoothLen = 0.1f;
-	mass = 0.3f;
-	rho_rest = mass / pow(smoothLen, 3);
-	k = 1.0f;
-	d = 3;
-	viscosity = 0.0000005f;
-
-	// Box property
-	boxSize = 0.5f - smoothLen / 2.0f;
-	boxElasticity = 0.3f;
-
-	// Hash table
-	gridSize = pow(boxSize/smoothLen, 3);
-	ht = HashTable(gridSize, smoothLen);
+	initialize(1);
 
 	//float tem = sqrt(100);
 	//int count = 0;
@@ -50,24 +33,6 @@ ParticleSystem::ParticleSystem()
 	//		count++;
 	//	}
 	//}
-
-	for (int i = 0; i < NUM; i++)
-	{
-		Particle* p = new Particle();
-		p->id = i;
-		p->setConstants(d, smoothLen, rho_rest, mass, k, viscosity);
-		p->setHitConstants(boxSize, boxElasticity);
-		float dx = float(rand() % 1000) / 1000.0f - 0.5f;
-		float dy = float(rand() % 1000) / 1000.0f - 0.5f;
-		float dz = float(rand() % 1000) / 1000.0f - 0.5f;
-		p->position = glm::vec3(dx, dy, dz);
-		//p->velocity = 1.0f * glm::vec3(dx, dy, dz);
-		particles.push_back(p);
-		ht.addToCell(p);
-	}
-
-	setNeighbors();
-
 }
 
 ParticleSystem::~ParticleSystem()
@@ -92,6 +57,51 @@ int ParticleSystem::tap()
 
 	cout << "Number of particles: " << NUM << endl;
 	return 0;
+}
+
+void ParticleSystem::initialize(bool mode)
+{
+	if (mode == 0)
+	{
+		particles.clear();
+		ht.reset();
+	}
+
+	NUM = 1000;
+
+	// Particle property
+	radius = 0.05f;
+	smoothLen = 0.1f;
+	mass = 0.3f;
+	rho_rest = mass / pow(smoothLen, 3);
+	k = 1.0f;
+	d = 3;
+	viscosity = 0.0000005f;
+
+	// Box property
+	boxSize = 0.5f - smoothLen / 2.0f;
+	boxElasticity = 0.3f;
+
+	// Hash table
+	gridSize = pow(boxSize / smoothLen, 3);
+	ht = HashTable(gridSize, smoothLen);
+	
+	for (int i = 0; i < NUM; i++)
+	{
+		Particle* p = new Particle();
+		p->id = i;
+		p->setConstants(d, smoothLen, rho_rest, mass, k, viscosity);
+		p->setHitConstants(boxSize, boxElasticity);
+		float dx = float(rand() % 1000) / 1000.0f - 0.5f;
+		float dy = float(rand() % 1000) / 1000.0f - 0.5f;
+		float dz = float(rand() % 1000) / 1000.0f - 0.5f;
+		p->position = glm::vec3(dx, dy, dz);
+		//p->velocity = 1.0f * glm::vec3(dx, dy, dz);
+		particles.push_back(p);
+		ht.addToCell(p);
+	}
+
+	setNeighbors();
 }
 
 void ParticleSystem::boxSizeUpdate(float size_)

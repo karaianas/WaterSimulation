@@ -18,6 +18,7 @@ public:
 	~ParticleSystem();
 
 	int tap();
+	void initialize(bool mode);
 	void boxSizeUpdate(float size_);
 	void viscosityUpdate(bool mode);
 	void stiffUpdate(bool mode);

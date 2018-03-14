@@ -214,10 +214,12 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		if (key == GLFW_KEY_P)
 			ps.tap();
 
-		// Increast viscosity
-		if (key == GLFW_KEY_V)
+		// Reset
+		if (key == GLFW_KEY_R)
 		{
-
+			ps.initialize(0);
+			boxScale = 1.0f;
+			box->update(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * boxScale));
 		}
 
 		if (key == GLFW_KEY_A)

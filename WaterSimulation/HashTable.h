@@ -129,6 +129,11 @@ public:
 		}
 	}
 
+	void reset()
+	{
+		htable.clear();
+	}
+
 
 
 private:
