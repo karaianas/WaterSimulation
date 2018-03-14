@@ -20,6 +20,7 @@ public:
 	int tap();
 	void boxSizeUpdate(float size_);
 	void viscosityUpdate(bool mode);
+	void stiffUpdate(bool mode);
 
 	void update(float dt);
 	void draw(GLuint program, glm::mat4 P, glm::mat4 V);

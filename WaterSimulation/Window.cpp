@@ -187,9 +187,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 				}
 			}
 			else if (parameter == 1)
-			{
 				ps.viscosityUpdate(0);
-			}
+			else if (parameter == 2)
+				ps.stiffUpdate(0);
 
 		}
 		if (key == GLFW_KEY_DOWN)
@@ -205,10 +205,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 				}
 			}
 			else if (parameter == 1)
-			{
 				ps.viscosityUpdate(1);
-			}
-
+			else if (parameter == 2)
+				ps.stiffUpdate(1);
 		}
 
 		// Add particles

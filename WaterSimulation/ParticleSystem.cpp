@@ -13,7 +13,7 @@ ParticleSystem::ParticleSystem()
 	rho_rest = mass / pow(smoothLen, 3);
 	k = 1.0f;
 	d = 3;
-	viscosity = 0.000005f;
+	viscosity = 0.0000005f;
 
 	// Box property
 	boxSize = 0.5f - smoothLen / 2.0f;
@@ -103,7 +103,7 @@ void ParticleSystem::boxSizeUpdate(float size_)
 
 void ParticleSystem::viscosityUpdate(bool mode)
 {
-	if (viscosity < 0.000005f  && mode == 0)
+	if (viscosity < 0.000001f  && mode == 0)
 	{
 		viscosity += 0.0000001f;
 		cout << "Viscosity: " << viscosity << endl;
@@ -117,6 +117,23 @@ void ParticleSystem::viscosityUpdate(bool mode)
 		for (int i = 0; i < NUM; i++)
 			particles[i]->viscosity = viscosity;
 	}
+}
+
+void ParticleSystem::stiffUpdate(bool mode)
+{
+	if (mode == 0)
+	{
+		k *= 10.0f;
+		for (int i = 0; i < NUM; i++)
+			particles[i]->k = k;
+	}
+	else if (mode == 1)
+	{
+		k /= 10.0f;
+		for (int i = 0; i < NUM; i++)
+			particles[i]->k = k;
+	}
+	cout << "Stiffness: " << k << endl;
 }
 
 void ParticleSystem::update(float dt)
