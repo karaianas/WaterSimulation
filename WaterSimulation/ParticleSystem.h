@@ -5,7 +5,7 @@
 #include "HashTable.h"
 #include "Cube.h"
 
-#define NUM 1000
+#define NUM 2000
 #define BNUM 0
 
 using namespace std;

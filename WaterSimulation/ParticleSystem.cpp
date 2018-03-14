@@ -60,37 +60,38 @@ ParticleSystem::ParticleSystem()
 		p->position = 1.0f * glm::vec3(dx, dy, dz);
 		p->velocity = 1.0f * glm::vec3(dx, dy, dz);
 		particles.push_back(p);
-		//ht.addToCell(&particles[particleCount]);
+		ht.addToCell(p);
 
 	}
 
-	//setNeighbors();
+	setNeighbors();
 
 }
 
 void ParticleSystem::update(float dt)
 {
 	// (1) Find neighbors
-	for (int i = 0; i < NUM; i++)
-		particles[i]->flag = false;
+	setNeighbors();
+	//for (int i = 0; i < NUM; i++)
+	//	particles[i]->flag = false;
 
-	for (int i = 0; i < NUM; i++)
-	{
-		particles[i]->neighbors.clear();
-		for (int j = 0; j < NUM + BNUM; j++)
-		{
-			if (particles[i]->id != particles[j]->id)
-			{
-				float len = glm::length(particles[i]->position - particles[j]->position);
-				if (len <= 2.0f * hradius)
-				{
-					if (i == 327)
-						particles[j]->flag = true;
-					particles[i]->neighbors.push_back(particles[j]);
-				}
-			}
-		}
-	}
+	//for (int i = 0; i < NUM; i++)
+	//{
+	//	particles[i]->neighbors.clear();
+	//	for (int j = 0; j < NUM + BNUM; j++)
+	//	{
+	//		if (particles[i]->id != particles[j]->id)
+	//		{
+	//			float len = glm::length(particles[i]->position - particles[j]->position);
+	//			if (len <= 2.0f * hradius)
+	//			{
+	//				if (i == 327)
+	//					particles[j]->flag = true;
+	//				particles[i]->neighbors.push_back(particles[j]);
+	//			}
+	//		}
+	//	}
+	//}
 
 	// (2) Compute density and pressure
 	for (int i = 0; i < NUM; i++)
@@ -110,7 +111,15 @@ void ParticleSystem::update(float dt)
 	// (4) Update particles and the hash table
 	for (int i = 0; i < NUM; i++)
 	{
+		int prev = ht.getCell(particles[i]->position);
 		particles[i]->update(dt);
+		int post = ht.getCell(particles[i]->position);
+
+		if (prev != post)
+		{
+			ht.deleteFromCell(prev, particles[i]);
+			ht.addToCell2(post, particles[i]);
+		}
 	}
 }
 /*
@@ -267,8 +276,8 @@ void ParticleSystem::initBuffers()
 
 void ParticleSystem::setNeighbors()
 {
-	//for(int i = 0; i < NUM; i++)
-	//{
-	//	ht.getNeighbors(&particles[i]);
-	//}
+	for(int i = 0; i < NUM; i++)
+	{
+		ht.getNeighbors(particles[i]);
+	}
 }
