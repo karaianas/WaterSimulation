@@ -32,6 +32,10 @@ public:
 
 	void setNeighbors();
 
+	void splashDemo();
+	void collisionDemo();
+	void gravityDemo(glm::mat4 R);
+
 	//vector<Particle*> particles;
 
 private:
@@ -47,4 +51,5 @@ private:
 	int NUM;
 
 	bool colorMode;
+	bool isColl;
 };

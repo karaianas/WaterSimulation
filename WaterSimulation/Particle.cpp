@@ -5,6 +5,7 @@ using namespace std;
 Particle::Particle()
 {
 	flag = false;
+	isBox = true;
 	position = glm::vec3(0.0f);
 	velocity = glm::vec3(0.0f);
 	force = glm::vec3(0.0f);
@@ -33,6 +34,48 @@ void Particle::setConstants(int d_, float h_, float rho_rest_, float mass_, floa
 
 void Particle::adjust(float dt)
 {
+	if (!isBox)
+	{
+		int i = 1;
+		glm::vec3 normal(0.0f);
+
+		if (position[i] < -size)
+		{
+			normal[i] = 1.0f;
+
+			// Find hit position
+			float t = (glm::dot(normal, position) + size) / glm::dot(normal, velocity);
+			glm::vec3 hit = position - t * velocity;
+
+			// Adjust position
+			position[i] = 2.0f * hit[i] - position[i];
+
+			// Apply impulse
+			glm::vec3 force_ = glm::dot(velocity, normal) * normal * -massElas / dt;
+			glm::vec3 accel = massInv * force_;
+			velocity += accel * dt;
+			position += velocity * dt;
+		}
+		else if (position[i] > size)
+		{
+			normal[i] = -1.0f;
+
+			// Find hit position
+			float t = (glm::dot(normal, position) + size) / glm::dot(normal, velocity);
+			glm::vec3 hit = position - t * velocity;
+
+			// Adjust position
+			position[i] = 2.0f * hit[i] - position[i];
+
+			// Apply impulse
+			glm::vec3 force_ = glm::dot(velocity, normal) * normal * -massElas / dt;
+			glm::vec3 accel = massInv * force_;
+			velocity += accel * dt;
+			position += velocity * dt;
+		}
+
+		return;
+	}
 	for (int i = 0; i < 3; i++)
 	{
 		glm::vec3 normal(0.0f);
@@ -202,3 +245,5 @@ float Particle::df(float q)
 
 	return scaleFactor * result;
 }
+
+

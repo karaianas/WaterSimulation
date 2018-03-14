@@ -67,6 +67,7 @@ void ParticleSystem::initialize(bool mode)
 		ht.reset();
 	}
 
+	isColl = false;
 	colorMode = false;
 	NUM = 1000;
 
@@ -196,8 +197,11 @@ void ParticleSystem::update(float dt)
 	// (3) Compute forces
 	for (int i = 0; i < NUM; i++)
 	{
-		particles[i]->F_pressure();
-		particles[i]->F_viscosity();
+		if (!isColl)
+		{
+			particles[i]->F_pressure();
+			particles[i]->F_viscosity();
+		}
 		particles[i]->F_gravity();
 	}
 
@@ -316,4 +320,65 @@ void ParticleSystem::setNeighbors()
 {
 	for(int i = 0; i < NUM; i++)
 		ht.getNeighbors(particles[i]);
+}
+
+void ParticleSystem::splashDemo()
+{
+	// Reset everything
+	initialize(0);
+
+	for (int i = 0; i < NUM; i++)
+		particles[i]->isBox = false;
+}
+
+void ParticleSystem::collisionDemo()
+{
+	isColl = true;
+	particles.clear();
+	ht.reset();
+
+	colorMode = true;
+	NUM = 10;
+
+	// Particle property
+	radius = 0.05f;
+	smoothLen = 0.1f;
+	mass = 0.3f;
+	rho_rest = mass / pow(smoothLen, 3);
+	k = 1.0f;
+	d = 3;
+	viscosity = 0.0000005f;
+
+	// Box property
+	boxSize = 0.5f - smoothLen / 2.0f;
+	boxElasticity = 1.0f;
+
+	// Hash table
+	gridSize = pow(boxSize / smoothLen, 3);
+	ht = HashTable(gridSize, smoothLen);
+
+	for (int i = 0; i < NUM; i++)
+	{
+		Particle* p = new Particle();
+		p->id = i;
+		p->setConstants(d, smoothLen, rho_rest, mass, k, viscosity);
+		p->setHitConstants(boxSize, boxElasticity);
+		float dx = float(rand() % 1000) / 1000.0f - 0.5f;
+		float dy = float(rand() % 1000) / 1000.0f - 0.5f;
+		float dz = float(rand() % 1000) / 1000.0f - 0.5f;
+		p->position = glm::vec3(dx, dy, dz);
+		p->velocity = 1.0f * glm::vec3(dx, dy, dz);
+		particles.push_back(p);
+		ht.addToCell(p);
+	}
+
+	setNeighbors();
+}
+
+void ParticleSystem::gravityDemo(glm::mat4 R)
+{
+	for (int i = 0; i < NUM; i++)
+	{
+		particles[i]->gravity = glm::vec3(R * glm::vec4(particles[i]->gravity, 1.0f));
+	}
 }

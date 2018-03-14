@@ -268,6 +268,12 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 				wireframe = true;
 		}
 
+		if (key == GLFW_KEY_2)
+			ps.splashDemo();
+
+		if (key == GLFW_KEY_3)
+			ps.collisionDemo();
+
 	}
 }
 
@@ -339,30 +345,19 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 	}
 	if (isRight)
 	{
-		//// Calculate angle, axis, and rotation mtx
-		//glm::vec3 prev_pos_ball = trackball(prev_pos2);
-		//glm::vec3 curr_pos_ball = trackball(glm::vec2(xpos, ypos));
+		// Calculate angle, axis, and rotation mtx
+		glm::vec3 prev_pos_ball = trackball(prev_pos2);
+		glm::vec3 curr_pos_ball = trackball(glm::vec2(xpos, ypos));
 
-		//float angle = glm::degrees(glm::acos(std::min(1.0f, glm::dot(curr_pos_ball, prev_pos_ball))));
-		//glm::vec3 axis = glm::normalize(glm::cross(prev_pos_ball, curr_pos_ball));
-		//glm::mat4 R = glm::rotate(glm::mat4(1.0f), angle * 0.01f, axis);
+		float angle = glm::degrees(glm::acos(std::min(1.0f, glm::dot(curr_pos_ball, prev_pos_ball))));
+		glm::vec3 axis = glm::normalize(glm::cross(prev_pos_ball, curr_pos_ball));
+		glm::mat4 R = glm::rotate(glm::mat4(1.0f), angle * 0.01f, axis);
 
-		//// Point rotation
-		//glm::mat4 PV = P * V;
-		//glm::vec4 p = glm::vec4(cp->getPos(), 1.0f);
-		//cp->setPos(R * p);
-		//cloth->updateWind(cp->getPos());
-		//parachute->updateWind(cp->getPos());
+		// Model rotation
+		//M->rotate(R);
+		ps.gravityDemo(R);
 
-		//// Model rotation
-		////M->rotate(R);
-
-		//// Camera rotation
-		////cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), -angle * 0.01f, axis) * glm::vec4(cam_pos, 1.0f));
-		////cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), -angle * 0.01f, axis) * glm::vec4(cam_up, 1.0f));
-		////V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-
-		//prev_pos2 = glm::vec2(xpos, ypos);
+		prev_pos2 = glm::vec2(xpos, ypos);
 	}
 }
 

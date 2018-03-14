@@ -66,5 +66,6 @@ public:
 	float elasticity;
 
 	bool flag;
+	bool isBox;
 	vector<Particle*> neighbors;
 };
