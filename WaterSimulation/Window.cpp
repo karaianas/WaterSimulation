@@ -162,6 +162,11 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 				isTap = true;
 		}
 
+		if (key == GLFW_KEY_P)
+		{
+			ps.tap();
+		}
+
 		if (key == GLFW_KEY_A)
 		{
 			theta -= dtheta;

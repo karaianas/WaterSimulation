@@ -4,21 +4,20 @@ using namespace std;
 
 ParticleSystem::ParticleSystem()
 {
-	particleCount = 0;
+	NUM = 1000;
 
 	//radius = 0.01f;
 	//hradius = 0.01f;
 	//rho_rest = 3000;
 	radius = 0.01f;
 	hradius = 0.1f;//0.08
-	float mass = 0.3f;// pow(hradius, 3) * rho_rest;
+	mass = 0.3f;// pow(hradius, 3) * rho_rest;
 	rho_rest = mass / pow(hradius, 3);
-	float k = 1.0f;
-	int d = 3;
+	k = 1.0f;
+	d = 3;
 
-	gridSize = 1000;
-	float spacing = hradius;
-	ht = HashTable(gridSize, spacing);
+	gridSize = 10000;
+	ht = HashTable(gridSize, hradius);
 
 	//float tem = sqrt(100);
 	//int count = 0;
@@ -57,8 +56,8 @@ ParticleSystem::ParticleSystem()
 		float dx = float(rand() % 1000) / 1000.0f - 0.5f;
 		float dy = float(rand() % 1000) / 1000.0f - 0.5f;
 		float dz = float(rand() % 1000) / 1000.0f - 0.5f;
-		p->position = 1.0f * glm::vec3(dx, dy, dz);
-		p->velocity = 1.0f * glm::vec3(dx, dy, dz);
+		p->position = glm::vec3(dx, dy, dz);
+		//p->velocity = 1.0f * glm::vec3(dx, dy, dz);
 		particles.push_back(p);
 		ht.addToCell(p);
 
@@ -68,30 +67,75 @@ ParticleSystem::ParticleSystem()
 
 }
 
+int ParticleSystem::tap()
+{
+	for(int i = -1; i <= 1; i++)
+		for(int j = -1; j <= 1; j++)
+			for (int l = -1; l <= 1; l++)
+			{
+				Particle* p = new Particle();
+				p->id = NUM;
+				p->setConstants(d, hradius, rho_rest, mass, k);
+				p->position = 0.1f * glm::vec3(i, j, l) + glm::vec3(0.0f, 0.7f, 0.0f);
+				particles.push_back(p);
+				ht.addToCell(p);
+				NUM++;
+			}
+	//for (int i = 0; i < 100; i++)
+	//{
+	//	Particle* p = new Particle();
+	//	p->id = NUM;
+	//	p->setConstants(d, hradius, rho_rest, mass, k);
+
+	//	float dx = float(rand() % 1000) / 1000.0f - 0.5f;
+	//	float dy = float(rand() % 1000) / 1000.0f - 0.5f;
+	//	float dz = float(rand() % 1000) / 1000.0f - 0.5f;
+	//	p->position = 1.0f * glm::vec3(dx, dy, dz);
+	//	//p->velocity = 1.0f * glm::vec3(dx, dy, dz);
+	//	particles.push_back(p);
+	//	ht.addToCell(p);
+	//	NUM++;
+	//}
+
+	//Particle* p = new Particle();
+	//p->id = NUM;
+	//p->setConstants(d, hradius, rho_rest, mass, k);
+	//p->position = glm::vec3(0.0f, 0.3f, 0.0f);
+	//particles.push_back(p);
+	//ht.addToCell(p);
+	//NUM++;
+
+	cout << "Number of particles: " << NUM << endl;
+	return 0;
+}
+
 void ParticleSystem::update(float dt)
 {
 	// (1) Find neighbors
 	setNeighbors();
-	//for (int i = 0; i < NUM; i++)
-	//	particles[i]->flag = false;
+	/*
+	// Brute force
+	for (int i = 0; i < NUM; i++)
+		particles[i]->flag = false;
 
-	//for (int i = 0; i < NUM; i++)
-	//{
-	//	particles[i]->neighbors.clear();
-	//	for (int j = 0; j < NUM + BNUM; j++)
-	//	{
-	//		if (particles[i]->id != particles[j]->id)
-	//		{
-	//			float len = glm::length(particles[i]->position - particles[j]->position);
-	//			if (len <= 2.0f * hradius)
-	//			{
-	//				if (i == 327)
-	//					particles[j]->flag = true;
-	//				particles[i]->neighbors.push_back(particles[j]);
-	//			}
-	//		}
-	//	}
-	//}
+	for (int i = 0; i < NUM; i++)
+	{
+		particles[i]->neighbors.clear();
+		for (int j = 0; j < NUM + BNUM; j++)
+		{
+			if (particles[i]->id != particles[j]->id)
+			{
+				float len = glm::length(particles[i]->position - particles[j]->position);
+				if (len <= 2.0f * hradius)
+				{
+					if (i == 327)
+						particles[j]->flag = true;
+					particles[i]->neighbors.push_back(particles[j]);
+				}
+			}
+		}
+	}
+	*/
 
 	// (2) Compute density and pressure
 	for (int i = 0; i < NUM; i++)
@@ -122,68 +166,7 @@ void ParticleSystem::update(float dt)
 		}
 	}
 }
-/*
-void ParticleSystem::update(float dt)
-{
-	// (1) Find neighbors
-	for (int i = 0; i < NUM; i++)
-	{
-		particles[i].neighbors.clear();
-		for (int j = 0; j < NUM; j++)
-		{
-			if (particles[i].id != particles[j].id)
-			{
-				float len = glm::length(particles[i].position - particles[j].position);
-				if (len <= 2.0f * hradius)
-				{
-					//cout << i << ": " << j << endl;
-					particles[i].neighbors.push_back(&particles[j]);
-				}
-			}
-		}
-		//if(particles[i].neighbors.size() > 1)
-		//	cout << i << ":" << particles[i].neighbors.size() << endl;
-		//ht.getNeighbors(&particles[i]);
 
-	}
-
-	// (2) Compute density and pressure
-	for (int i = 0; i < NUM; i++)
-	{
-		particles[i].calcDensity();
-		particles[i].calcPressure();
-		//if(particles[i].neighbors.size() > 0)
-		//{
-		//	//cout << particles[i].neighbors.size() << endl;
-		//	//cout << i <<":" << particles[i].rho << endl;
-		//	//cout << i << ":" << particles[i].pressure << endl;
-		//	//cout << particles[i].rho << " / " << rho_rest << " = " << particles[i].rho / rho_rest << endl;
-		//}
-	}
-
-	// (3) Compute forces
-	for (int i = 0; i < NUM; i++)
-	{
-		particles[i].F_pressure();
-		//particles[i].F_viscosity();
-		particles[i].F_gravity();
-	}
-
-	// (4) Update particles and the hash table
-	for (int i = 0; i < NUM; i++)
-	{
-		//int prev = ht.getCell(particles[i].position);
-		particles[i].update(dt);
-		//int post = ht.getCell(particles[i].position);
-
-		//if (prev != post)
-		//{
-		//	ht.deleteFromCell(prev, &particles[i]);
-		//	ht.addToCell2(post, &particles[i]);
-		//}
-	}
-}
-*/
 void ParticleSystem::draw(GLuint program, glm::mat4 P, glm::mat4 V)
 {
 	glUseProgram(program);
@@ -213,7 +196,7 @@ void ParticleSystem::drawObj(Obj* obj, GLuint program, glm::mat4 P, glm::mat4 V)
 {
 	initBuffers();
 	int count = 0;
-	for (int i = 0; i < NUM + BNUM; i++)
+	for (int i = 0; i < NUM; i++)
 	{
 		glm::vec3 pos = particles[i]->position;
 		glm::mat4 M(1.0f);

@@ -5,9 +5,6 @@
 #include "HashTable.h"
 #include "Cube.h"
 
-#define NUM 2000
-#define BNUM 0
-
 using namespace std;
 
 class ParticleSystem {
@@ -37,7 +34,7 @@ private:
 	vector<glm::vec3> positions;
 	vector<glm::vec3> normals;
 
-	float radius, hradius, rho_rest;
+	float radius, hradius, rho_rest, mass, k, d;
 	int gridSize;
-	int particleCount;
+	int NUM;
 };

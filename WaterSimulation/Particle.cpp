@@ -17,9 +17,8 @@ void Particle::adjust(float dt)
 {
 
 	float size = 0.5f - 0.05f;
-	float threshold = 0.0001f;//0.0001f
+	float top = size + 0.5f;
 	float elasticity = 0.3f;
-	int counter = 0;
 
 	if (position.y < -size)
 	{
@@ -129,8 +128,8 @@ void Particle::F_pressure()
 	glm::vec3 force_(0.0f);
 	for (int i = 0; i < neighbors.size(); i++)
 	{
-		//if (pow(rho, 2) < 0.00001f || pow(neighbors[i]->rho, 2) < 0.00001f)
-		//	return;
+		if (pow(rho, 2) < 0.00001f || pow(neighbors[i]->rho, 2) < 0.00001f)
+			return;
 		force_ += neighbors[i]->mass * (pressure / pow(rho, 2) + \
 			neighbors[i]->pressure / pow(neighbors[i]->rho, 2)) * dW_ij(neighbors[i]->position);
 	}
@@ -149,7 +148,7 @@ void Particle::F_viscosity()
 		force_ += neighbors[i]->mass / neighbors[i]->rho * (velocity - neighbors[i]->velocity) \
 			* glm::dot(x_ij , dW_ij(neighbors[i]->position)) / float(glm::dot(x_ij, x_ij) * 0.01 * pow(h, 2));
 	}
-	float viscos = 0.0000001f;// 0.000001f; //0.0000001f;//0.000001f;
+	float viscos = 0.0000005f;//0.000001f; //0.0000005f; //0.0000001f;
 	force_ *= 2 * mass * viscos;
 	applyForce(force_);
 }
