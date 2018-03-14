@@ -13,90 +13,69 @@ Particle::Particle()
 	rho = 0.0f;
 }
 
+void Particle::setConstants(int d_, float h_, float rho_rest_, float mass_, float k_)
+{
+	d = d_;
+	h = h_;
+	rho_rest = rho_rest_;
+	mass = mass_;
+	k = k_;
+
+	// Set commonly used constants
+	gravity = glm::vec3(0, -9.8f, 0.0f) * mass;
+	massInv = 1.0f / mass;
+	h3Inv = 1.0f / pow(h, d);
+	h4Inv = 1.0f / pow(h, d + 1);
+	h2_01 = 0.01f * pow(h, 2);
+};
+
 void Particle::adjust(float dt)
 {
-
-	float size = 0.5f - 0.05f;
-	float top = size + 0.5f;
-	float elasticity = 0.3f;
-
-	if (position.y < -size)
+	for (int i = 0; i < 3; i++)
 	{
-		glm::vec3 normal(0.0f, 1.0f, 0.0f);
-		float t = (glm::dot(normal, position) + size) / glm::dot(normal, velocity);
-		glm::vec3 hit = position - t * velocity;
-		position.y = 2.0f * hit.y - position.y;
+		glm::vec3 normal(0.0f);
 
-		glm::vec3 force_ = glm::dot(velocity, normal) * normal * -mass * (1 + elasticity) / dt;
-		glm::vec3 accel = (1.0f / mass) * force_;
-		velocity += accel * dt;
-		position += velocity * dt;
-	}
-	else if (position.y > size)
-	{
-		glm::vec3 normal(0.0f, -1.0f, 0.0f);
-		float t = (glm::dot(normal, position) + size) / glm::dot(normal, velocity);
-		glm::vec3 hit = position - t * velocity;
-		position.y = 2.0f * hit.y - position.y;
+		if (position[i] < -size)
+		{
+			normal[i] = 1.0f;
 
-		glm::vec3 force_ = glm::dot(velocity, normal) * normal * -mass * (1 + elasticity) / dt;
-		glm::vec3 accel = (1.0f / mass) * force_;
-		velocity += accel * dt;
-		position += velocity * dt;
-	}
+			// Find hit position
+			float t = (glm::dot(normal, position) + size) / glm::dot(normal, velocity);
+			glm::vec3 hit = position - t * velocity;
 
-	if (position.x < -size)
-	{
-		glm::vec3 normal(1.0f, 0.0f, 0.0f);
-		float t = (glm::dot(normal, position) + size) / glm::dot(normal, velocity);
-		glm::vec3 hit = position - t * velocity;
-		position.x = 2.0f * hit.x - position.x;
-		glm::vec3 force_ = glm::dot(velocity, normal) * normal * -mass * (1 + elasticity) / dt;
-		glm::vec3 accel = (1.0f / mass) * force_;
-		velocity += accel * dt;
-		position += velocity * dt;
-	}
-	else if (position.x > size)
-	{
-		glm::vec3 normal(-1.0f, 0.0f, 0.0f);
-		float t = (glm::dot(normal, position) + size) / glm::dot(normal, velocity);
-		glm::vec3 hit = position - t * velocity;
-		position.x = 2.0f * hit.x - position.x;
-		glm::vec3 force_ = glm::dot(velocity, normal) * normal * -mass * (1 + elasticity) / dt;
-		glm::vec3 accel = (1.0f / mass) * force_;
-		velocity += accel * dt;
-		position += velocity * dt;
-	}
+			// Adjust position
+			position[i] = 2.0f * hit[i] - position[i];
 
-	if (position.z < -size)
-	{
-		glm::vec3 normal(0.0f, 0.0f, 1.0f);
-		float t = (glm::dot(normal, position) + size) / glm::dot(normal, velocity);
-		glm::vec3 hit = position - t * velocity;
-		position.z = 2.0f * hit.z - position.z;
-		glm::vec3 force_ = glm::dot(velocity, normal) * normal * -mass * (1 + elasticity) / dt;
-		glm::vec3 accel = (1.0f / mass) * force_;
-		velocity += accel * dt;
-		position += velocity * dt;
-	}
-	else if (position.z > size)
-	{
-		glm::vec3 normal(0.0f, 0.0f, -1.0f);
-		float t = (glm::dot(normal, position) + size) / glm::dot(normal, velocity);
-		glm::vec3 hit = position - t * velocity;
-		position.z = 2.0f * hit.z - position.z;
-		glm::vec3 force_ = glm::dot(velocity, normal) * normal * -mass * (1 + elasticity) / dt;
-		glm::vec3 accel = (1.0f / mass) * force_;
-		velocity += accel * dt;
-		position += velocity * dt;
-	}
+			// Apply impulse
+			glm::vec3 force_ = glm::dot(velocity, normal) * normal * -massElas / dt;
+			glm::vec3 accel = massInv * force_;
+			velocity += accel * dt;
+			position += velocity * dt;
+		}
+		else if (position[i] > size)
+		{
+			normal[i] = -1.0f;
 
+			// Find hit position
+			float t = (glm::dot(normal, position) + size) / glm::dot(normal, velocity);
+			glm::vec3 hit = position - t * velocity;
+
+			// Adjust position
+			position[i] = 2.0f * hit[i] - position[i];
+
+			// Apply impulse
+			glm::vec3 force_ = glm::dot(velocity, normal) * normal * -massElas / dt;
+			glm::vec3 accel = massInv * force_;
+			velocity += accel * dt;
+			position += velocity * dt;
+		}
+	}
 }
 
 void Particle::update(float dt)
 {
 	// (1) Compute acceleration
-	glm::vec3 accel = (1.0f / mass) * force;
+	glm::vec3 accel = massInv * force;
 
 	// (2) New velocity and new positon
 	velocity += accel * dt;
@@ -130,6 +109,7 @@ void Particle::F_pressure()
 	{
 		if (pow(rho, 2) < 0.00001f || pow(neighbors[i]->rho, 2) < 0.00001f)
 			return;
+
 		force_ += neighbors[i]->mass * (pressure / pow(rho, 2) + \
 			neighbors[i]->pressure / pow(neighbors[i]->rho, 2)) * dW_ij(neighbors[i]->position);
 	}
@@ -146,7 +126,7 @@ void Particle::F_viscosity()
 		if (neighbors[i]->rho < 0.00001f)
 			return;
 		force_ += neighbors[i]->mass / neighbors[i]->rho * (velocity - neighbors[i]->velocity) \
-			* glm::dot(x_ij , dW_ij(neighbors[i]->position)) / float(glm::dot(x_ij, x_ij) * 0.01 * pow(h, 2));
+			* glm::dot(x_ij , dW_ij(neighbors[i]->position)) / float(glm::dot(x_ij, x_ij) * h2_01);
 	}
 	float viscos = 0.0000005f;//0.000001f; //0.0000005f; //0.0000001f;
 	force_ *= 2 * mass * viscos;
@@ -155,18 +135,18 @@ void Particle::F_viscosity()
 
 void Particle::F_gravity()
 {
-	glm::vec3 g(0, -9.8, 0);
+	//glm::vec3 g(0, -9.8, 0);
 	//glm::mat4 R = glm::rotate(glm::mat4(1.0f), 2.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 	//g = glm::vec3(R * glm::vec4(g, 1.0f));
-	glm::vec3 force_ = g * mass;
-	applyForce(force_);
+	//glm::vec3 force_ = g * mass;
+	applyForce(gravity);
 }
 
 float Particle::W_ij(glm::vec3 p_)
 {
 	float q = glm::length(p_ - position) / h;
 	
-	return 1.0f / pow(h, d) * f(q);
+	return h3Inv * f(q);
 }
 
 glm::vec3 Particle::dW_ij(glm::vec3 p_)
@@ -174,11 +154,11 @@ glm::vec3 Particle::dW_ij(glm::vec3 p_)
 	float norm = glm::length(p_ - position);
 	float q = norm / h;
 	
-	//if (q < 0.00001f)
-	//	return glm::vec3(0.0f);
+	if (norm < 0.00001f)
+		return glm::vec3(0.0f);
 
 	float dfdq = df(q);
-	float C = 1.0f / pow(h, d + 1) * dfdq / norm;
+	float C = h4Inv * dfdq / norm;
 
 	return C * (position - p_);
 }

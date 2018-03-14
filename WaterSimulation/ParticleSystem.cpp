@@ -6,12 +6,9 @@ ParticleSystem::ParticleSystem()
 {
 	NUM = 1000;
 
-	//radius = 0.01f;
-	//hradius = 0.01f;
-	//rho_rest = 3000;
 	radius = 0.01f;
-	hradius = 0.1f;//0.08
-	mass = 0.3f;// pow(hradius, 3) * rho_rest;
+	hradius = 0.1f;
+	mass = 0.3f;
 	rho_rest = mass / pow(hradius, 3);
 	k = 1.0f;
 	d = 3;
@@ -47,12 +44,15 @@ ParticleSystem::ParticleSystem()
 	//	}
 	//}
 
+	float boxSize = 0.5f - hradius / 2.0f;
+	float boxElasticity = 0.3f;
+
 	for (int i = 0; i < NUM; i++)
 	{
 		Particle* p = new Particle();
 		p->id = i;
 		p->setConstants(d, hradius, rho_rest, mass, k);
-
+		p->setHitConstants(boxSize, boxElasticity);
 		float dx = float(rand() % 1000) / 1000.0f - 0.5f;
 		float dy = float(rand() % 1000) / 1000.0f - 0.5f;
 		float dz = float(rand() % 1000) / 1000.0f - 0.5f;
@@ -260,7 +260,5 @@ void ParticleSystem::initBuffers()
 void ParticleSystem::setNeighbors()
 {
 	for(int i = 0; i < NUM; i++)
-	{
 		ht.getNeighbors(particles[i]);
-	}
 }
