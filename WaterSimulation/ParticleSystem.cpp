@@ -67,6 +67,7 @@ void ParticleSystem::initialize(bool mode)
 		ht.reset();
 	}
 
+	colorMode = false;
 	NUM = 1000;
 
 	// Particle property
@@ -144,6 +145,14 @@ void ParticleSystem::stiffUpdate(bool mode)
 			particles[i]->k = k;
 	}
 	cout << "Stiffness: " << k << endl;
+}
+
+void ParticleSystem::colorModeUpdate()
+{
+	if (colorMode)
+		colorMode = false;
+	else
+		colorMode = true;
 }
 
 void ParticleSystem::update(float dt)
@@ -243,7 +252,10 @@ void ParticleSystem::drawObj(Obj* obj, GLuint program, glm::mat4 P, glm::mat4 V)
 		glm::vec3 pos = particles[i]->position;
 		glm::mat4 M(1.0f);
 		M[3] = glm::vec4(pos, 1.0f);
-		//obj->setColor(glm::vec3(0.2f, 0.4f, 1.0f));
+		if (colorMode)
+			obj->setColor(glm::vec3(1.0f, 1.0f, 1.0f) * float(particles[i]->id) / float(NUM));
+		else
+			obj->setColor(glm::vec3(0.3f, 0.7f, 1.0f));
 		
 		//if (particles[i]->id == 0)
 		//{

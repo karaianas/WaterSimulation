@@ -222,6 +222,11 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			box->update(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * boxScale));
 		}
 
+		if (key == GLFW_KEY_C)
+		{
+			ps.colorModeUpdate();
+		}
+
 		if (key == GLFW_KEY_A)
 		{
 			theta -= dtheta;

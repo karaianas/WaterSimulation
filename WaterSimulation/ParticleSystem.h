@@ -22,6 +22,7 @@ public:
 	void boxSizeUpdate(float size_);
 	void viscosityUpdate(bool mode);
 	void stiffUpdate(bool mode);
+	void colorModeUpdate();
 
 	void update(float dt);
 	void draw(GLuint program, glm::mat4 P, glm::mat4 V);
@@ -44,4 +45,6 @@ private:
 	float boxSize, boxElasticity;
 	int gridSize;
 	int NUM;
+
+	bool colorMode;
 };
