@@ -9,5 +9,5 @@ https://youtu.be/a7vZs67Dcsw
 
 Below is a screenshot of the demo:
 <p align="center">
-  <img src="https://github.com/karaianas/WaterSimulation/blob/master/WaterSimulation/Images/WaterSim.PNG" width="640">
+  <img src="https://github.com/karaianas/WaterSimulation/blob/master/WaterSimulation/Images/WaterSim.PNG" width="480">
 </p>
