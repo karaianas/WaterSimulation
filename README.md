@@ -3,4 +3,9 @@ Simplified Navier-Stokes theorem is used to compute acceleration at each time st
 
 The following are demo videos of the water simulation with low and high viscosity, respectively:
 https://youtu.be/TgGMLTFl2nM
+
 https://youtu.be/a7vZs67Dcsw
+
+<p align="center">
+  <img src="https://github.com/karaianas/WaterSimulation/blob/master/WaterSimulation/Images/WaterSim.PNG" width="640">
+</p>
